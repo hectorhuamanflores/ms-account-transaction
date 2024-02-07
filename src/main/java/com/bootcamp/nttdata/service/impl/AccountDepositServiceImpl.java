@@ -38,7 +38,7 @@ public class AccountDepositServiceImpl implements AccountDepositService{
             .baseUrl("http://ms-account")
             .build()
             .post()
-            .uri("/Account/numAccount/")
+            .uri("/account/numAccount/")
             .body(Mono.just(objeto), AccountByNumAccountResponse.class)
             .retrieve()
             .bodyToMono(AccountByNumAccountResponse.class);
@@ -46,7 +46,7 @@ public class AccountDepositServiceImpl implements AccountDepositService{
     public Function<AccountUpdateForTrxRequest, Mono<AccountUpdateForTrxResponse>> msAccountTrx = (objeto) -> builder
             .baseUrl("http://ms-account")
             .build().put()
-            .uri("/Account/updateAccountTrx/")
+            .uri("/account/updateAccountTrx/")
             .body(Mono.just(objeto), AccountUpdateForTrxResponse.class)
             .retrieve()
             .bodyToMono(AccountUpdateForTrxResponse.class);

@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-@Document(value = "PRODUCTS_ACCOUNT_DEPOSIT")
+@Document(value = "account_deposit")
 public class AccountDeposit {
 
   @Id
