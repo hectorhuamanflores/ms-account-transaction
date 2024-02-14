@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: ms-account-transaction
+  cloud:
+    config:
+      enabled: true
+      uri: http://localhost:8090
+
+#spring.data.mongodb.uri= mongodb://localhost:27017/db-ms-account-transaction
