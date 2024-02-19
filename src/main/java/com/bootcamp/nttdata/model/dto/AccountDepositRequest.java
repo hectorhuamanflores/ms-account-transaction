@@ -17,7 +17,7 @@ import lombok.Setter;
 @Builder
 public class AccountDepositRequest {
   
-    private String  idAccount;        // Identificador de la cuenta
+    private String  numAccount;        // Identificador de la cuenta
     private Integer tyTrxAccount;     // 1:deposito  -1:retiro
     private Integer tyAccount;        // 1:ct.Ahorro - 2:ct.Corriente - 3:ct.PlazoFijo
     private Integer currency;         // tipo de moneda 1:soles

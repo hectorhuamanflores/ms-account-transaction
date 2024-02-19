@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/AccountWithdrawal")
+@RequestMapping("/accountWithdrawal")
 public class AccountWithdrawalController {
 
     private final AccountWithdrawalService accountWithdrawalService;

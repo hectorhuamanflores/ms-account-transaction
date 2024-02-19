@@ -3,6 +3,7 @@ package com.bootcamp.nttdata.service.impl;
 
 import java.util.function.Function;
 
+import com.bootcamp.nttdata.external.AccountClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,29 +24,29 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AccountDepositServiceImpl implements AccountDepositService{
-    private final AccountDepositRepository accountDepositRepository;
-
     @Autowired
-    private  WebClient.Builder builder;
+    private AccountDepositRepository accountDepositRepository;
 
-//	public WebClient creditServiceClient = builder
-//		      .baseUrl("http://ms-account")
-//		      .build();
+    //@Autowired
+   // private  WebClient.Builder builder;
 
-    public Function<AccountByNumAccountRequest, Mono<AccountByNumAccountResponse>> msAccountbynumAccount = (objeto) -> builder
-            .baseUrl("http://ms-account")
-            .build()
+   /* @Autowired
+    private  AccountClient accountClient;*/
+
+    private WebClient creditServiceClient = WebClient.builder()
+            .baseUrl("http://GATEWAY-SERVICE")
+            .build();
+
+    public Function<AccountByNumAccountRequest, Mono<AccountByNumAccountResponse>> msAccountbynumAccount = (objeto) -> creditServiceClient
             .post()
             .uri("/account/numAccount/")
-            .body(Mono.just(objeto), AccountByNumAccountResponse.class)
+            .body(Mono.just(objeto),AccountByNumAccountResponse.class)
             .retrieve()
             .bodyToMono(AccountByNumAccountResponse.class);
 
-    public Function<AccountUpdateForTrxRequest, Mono<AccountUpdateForTrxResponse>> msAccountTrx = (objeto) -> builder
-            .baseUrl("http://ms-account")
-            .build().put()
+    public Function<AccountUpdateForTrxRequest, Mono<AccountUpdateForTrxResponse>> msAccountTrx = (objeto) -> creditServiceClient
+            .put()
             .uri("/account/updateAccountTrx/")
             .body(Mono.just(objeto), AccountUpdateForTrxResponse.class)
             .retrieve()
@@ -72,12 +73,12 @@ public class AccountDepositServiceImpl implements AccountDepositService{
     @Override
     public Mono<AccountDeposit> createAccountDeposit(AccountDepositRequest deposit) {
         AccountByNumAccountRequest numAccount = AccountByNumAccountRequest.builder()
-                .numAccount(deposit.getIdAccount())
+                .numAccount(deposit.getNumAccount())
                 .build();
-
+        log.error("aqui si entraaaaaaaaaaaaaaaaaaaaaaaaaa");
         //consultar  saldo
         Mono<AccountByNumAccountResponse> consultMsAccount = msAccountbynumAccount.apply(numAccount);
-
+        //Mono<AccountByNumAccountResponse> consultMsAccount = accountClient.getAccountById(numAccount);
         return consultMsAccount.flatMap(result -> {
             double commssion;
             if(result.getMovementTrxMax() > result.getMovement()) {
@@ -87,8 +88,9 @@ public class AccountDepositServiceImpl implements AccountDepositService{
                 log.error("Con comision");
                 commssion = result.getCommission();
             }
+
             AccountDeposit t = AccountDeposit.builder()
-                    .idAccount(deposit.getIdAccount())
+                    .idAccount(deposit.getNumAccount())
                     .tyTrxAccount(deposit.getTyTrxAccount())
                     .tyAccount(deposit.getTyAccount())
                     .currency(deposit.getCurrency())
@@ -99,14 +101,14 @@ public class AccountDepositServiceImpl implements AccountDepositService{
                     .build();
 
             AccountUpdateForTrxRequest accountUpdateForTrx = AccountUpdateForTrxRequest.builder()
-                    .numAccount(deposit.getIdAccount())
+                    .numAccount(deposit.getNumAccount())
                     .type(deposit.getTyTrxAccount())
                     .amount(deposit.getAmountDeposit()-commssion)
                     .build();
 
             log.error("Entro al servicio Actualizar cuenta");
             Mono<AccountUpdateForTrxResponse> f = msAccountTrx.apply(accountUpdateForTrx);
-
+            //Mono<AccountUpdateForTrxResponse> f = accountClient.updatePayment(accountUpdateForTrx);
             log.error("Salio del servicio Actualizar cuenta");
             log.error("Crea el nuevo deposito");
             return f.flatMap(ra ->accountDepositRepository.save(t));
